@@ -3,16 +3,23 @@ kind: Ingress
 metadata:
   name: airflow-ingress
   namespace: dev
+  labels:
+    app: airflow-ingress
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-  labels:
-    app: airflow-ingress
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    #alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:604972259071:certificate/5f5be51e-90a7-47c8-91e8-fb4ab4639f81"  # Replace with your SSL certificate ARN
 spec:
+  ingressClassName: alb
   rules:
     - http:
         paths:
           - path: /airflow-dev/*
+            pathType: Prefix
             backend:
-              serviceName: airflow-webserver
-              servicePort: 8080
+              service:
+                name: airflow-webserver
+                port:
+                  number: 8080  # Port exposed by your application
